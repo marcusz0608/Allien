@@ -391,6 +391,68 @@
   color: var(--allien-text-soft);
 }
 
+.math-worlds {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.math-world-card {
+  border-radius: 1rem;
+  border: 1px solid var(--allien-border);
+  background: var(--allien-card-bg);
+  padding: 0.9rem 0.95rem;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: border-color 0.2s, background 0.2s, transform 0.1s;
+}
+
+.math-world-card:hover {
+  border-color: var(--allien-accent);
+  background: rgba(167, 139, 250, 0.06);
+  transform: translateY(-1px);
+}
+
+.math-world-card--selected {
+  border-color: var(--allien-accent);
+  background: rgba(167, 139, 250, 0.1);
+}
+
+.math-world-card--locked {
+  opacity: 0.55;
+  cursor: default;
+}
+
+.math-world-emoji {
+  font-size: 1.4rem;
+}
+
+.math-world-title {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--allien-heading);
+}
+
+.math-world-desc {
+  font-size: 0.85rem;
+  color: var(--allien-text-soft);
+}
+
+.math-world-tag {
+  font-size: 0.8rem;
+  color: var(--allien-text-soft);
+  opacity: 0.9;
+}
+
+.math-world-actions {
+  margin-top: 0.9rem;
+  text-align: center;
+}
+
 .game-links {
   display: flex;
   flex-direction: column;
