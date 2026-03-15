@@ -1,0 +1,328 @@
+.allien-app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--allien-bg);
+  overflow: visible;
+}
+
+/* ----- Header ----- */
+.header {
+  text-align: center;
+  padding: 1.25rem 1rem 1rem;
+  overflow: visible;
+  flex-shrink: 0;
+}
+
+.hero-mascot {
+  display: block;
+  margin: 0 auto 0.5rem;
+  filter: drop-shadow(0 2px 8px rgba(124, 58, 237, 0.25));
+  animation: float 3s ease-in-out infinite;
+  position: relative;
+  z-index: 0;
+}
+
+@keyframes float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
+
+.header h1 {
+  display: block;
+  position: relative;
+  z-index: 2;
+  font-size: 3rem;
+  line-height: 1.15;
+  margin: 0 0 0.5rem;
+  background: var(--allien-gradient);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  font-weight: 700;
+}
+
+.tagline {
+  display: block;
+  font-size: 1.15rem;
+  color: var(--allien-text-soft);
+  margin: 0;
+  line-height: 1.4;
+}
+
+/* ----- Main & Cards ----- */
+.main {
+  flex: 1;
+  padding: 0 1rem 1.25rem;
+  max-width: 900px;
+  margin: 0 auto;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1rem;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 1.5rem 1rem;
+  border-radius: 1rem;
+  text-decoration: none;
+  color: inherit;
+  border: 2px solid transparent;
+  transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+  background: var(--allien-card-bg);
+  box-shadow: var(--allien-shadow);
+}
+
+.card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--allien-shadow-hover);
+  border-color: var(--allien-accent);
+}
+
+.card-emoji {
+  font-size: 2.5rem;
+  margin-bottom: 0.5rem;
+  line-height: 1;
+}
+
+.card h2 {
+  font-size: 1.25rem;
+  margin: 0 0 0.35rem;
+  color: var(--allien-heading);
+}
+
+.card p {
+  font-size: 0.9rem;
+  margin: 0;
+  color: var(--allien-text-soft);
+  line-height: 1.4;
+}
+
+.card-games { --card-accent: #22c55e; }
+.card-quizzes { --card-accent: #3b82f6; }
+.card-ai { --card-accent: #a855f7; }
+.card-search { --card-accent: #f59e0b; }
+
+/* ----- Games section ----- */
+.games-section {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--allien-border);
+}
+
+.section-title {
+  font-size: 1.5rem;
+  margin: 0 0 0.75rem;
+  color: var(--allien-heading);
+  text-align: center;
+}
+
+.game-links {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.game-link {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--allien-card-bg);
+  border: 2px solid var(--allien-border);
+  text-decoration: none;
+  color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+  box-sizing: border-box;
+}
+
+.game-link-crazy:hover,
+.game-link-play:hover {
+  border-color: var(--allien-accent);
+  box-shadow: var(--allien-shadow-hover);
+  transform: translateX(4px);
+}
+
+.game-link-play {
+  cursor: pointer;
+  border: 2px solid var(--allien-border);
+  font: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.game-link-soon {
+  opacity: 0.85;
+  cursor: default;
+}
+
+.game-link-emoji {
+  font-size: 1.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+}
+
+.game-link-name {
+  font-weight: 600;
+  color: var(--allien-heading);
+  min-width: 7rem;
+  text-align: left;
+}
+
+.game-link-desc {
+  font-size: 0.9rem;
+  color: var(--allien-text-soft);
+  margin-left: auto;
+  text-align: right;
+}
+
+@media (max-width: 500px) {
+  .game-link {
+    flex-wrap: wrap;
+  }
+  .game-link-desc {
+    width: 100%;
+    margin-left: 0;
+    margin-top: 0.25rem;
+    padding-left: 2.75rem;
+    text-align: left;
+  }
+}
+
+.card:hover .card-emoji {
+  transform: scale(1.1);
+  transition: transform 0.2s;
+}
+
+/* ----- Footer ----- */
+.footer {
+  text-align: center;
+  padding: 1rem;
+  border-top: 1px solid var(--allien-border);
+  background: var(--allien-footer-bg);
+}
+
+.footer p {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--allien-text-soft);
+}
+
+@media (max-width: 500px) {
+  .header h1 { font-size: 2.25rem; }
+  .cards { grid-template-columns: 1fr; }
+}
+
+/* ----- Tic-Tac-Toe (6×6, 5 in a row) ----- */
+.tictactoe {
+  max-width: 420px;
+  margin: 0 auto;
+  padding: 1rem 0 2rem;
+}
+
+.tictactoe-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-bottom: 1rem;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.9rem;
+  color: var(--allien-accent);
+  background: transparent;
+  border: 1px solid var(--allien-border);
+  border-radius: 0.5rem;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.tictactoe-back:hover {
+  background: var(--allien-card-bg);
+  border-color: var(--allien-accent);
+}
+
+.tictactoe-title {
+  font-size: 1.5rem;
+  margin: 0 0 0.25rem;
+  color: var(--allien-heading);
+}
+
+.tictactoe-vs {
+  font-size: 0.95rem;
+  color: var(--allien-text-soft);
+  margin: 0 0 0.5rem;
+}
+
+.tictactoe-status {
+  font-size: 1.1rem;
+  margin: 0 0 1.25rem;
+  color: var(--allien-text-soft);
+}
+
+.tictactoe-board {
+  display: grid;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+}
+
+.tictactoe-board--6x6 {
+  grid-template-columns: repeat(6, 1fr);
+}
+
+.tictactoe-cell {
+  aspect-ratio: 1;
+  min-height: 44px;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--allien-heading);
+  background: var(--allien-card-bg);
+  border: 2px solid var(--allien-border);
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.2s, background 0.2s, transform 0.15s;
+}
+
+.tictactoe-cell:hover:not(:disabled) {
+  border-color: var(--allien-accent);
+  background: rgba(167, 139, 250, 0.08);
+  transform: scale(1.02);
+}
+
+.tictactoe-cell:disabled {
+  cursor: default;
+}
+
+.tictactoe-cell--X {
+  color: #60a5fa;
+}
+
+.tictactoe-cell--O {
+  color: #34d399;
+}
+
+.tictactoe-again {
+  display: block;
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--allien-bg);
+  background: var(--allien-gradient);
+  border: none;
+  border-radius: 0.75rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.2s;
+}
+
+.tictactoe-again:hover {
+  opacity: 0.95;
+  transform: scale(1.02);
+}

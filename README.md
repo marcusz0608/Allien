@@ -41,6 +41,7 @@ Quickly find what you want in the app:
 ## 🛠️ Tech Stack
 
 - **Frontend:** React (TypeScript)
+- **Build:** Vite
 
 ---
 
@@ -50,7 +51,7 @@ Quickly find what you want in the app:
 2. Clone this repo: `git clone https://github.com/marcusz0608/Allien.git`
 3. Go into the repo folder: `cd Allien`
 4. Install dependencies: `npm install`
-5. Start the app: `npm start`
+5. Start the app: `npm run dev`
 
 ---
 
