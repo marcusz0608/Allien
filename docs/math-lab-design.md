@@ -219,3 +219,33 @@ We can start with just **stars and level unlocks** in code, then add more visual
 
 This doc can grow as we add more ideas and details for Math Lab.
 
+---
+
+## 9. Adventure Game Mode (first design)
+
+**Idea:** Math Lab feels like a **game**: you control a little character on a map, move with **arrow keys** (up, down, left, right), and meet **enemies** on the map. When you move into an enemy, it asks you a **math question**. Answer correctly → you defeat the enemy and gain **energy**; answer wrong → you see the right answer and can try again. Goal: defeat all enemies to complete the level.
+
+### First version (v1)
+
+- **Map:** A small grid (e.g. 8×6 or 7×7). Empty tiles = walkable ground. Some tiles have an **enemy** (one per tile).
+- **Character:** One character (e.g. little person or Allien mascot) that the player controls. Starts at a fixed tile (e.g. top-left). **Controls:** Arrow keys Up / Down / Left / Right move the character one tile. Character cannot walk off the map.
+- **Enemies:** 3–5 fixed tiles have an “enemy” (e.g. monster or question mark). Enemies do not move. When the player **moves onto** an enemy tile:
+  - The game pauses and a **question modal** appears (same math question UI as today: one question, multiple choice).
+  - **Correct answer** → enemy is defeated (tile becomes empty or shows a “defeated” marker), player gains **energy** (e.g. +1), modal closes, character stays on that tile.
+  - **Wrong answer** → show the correct answer and a short “Try again” message; modal closes; enemy is **not** defeated, so the player can move away and come back to try again, or we could allow one retry on the same tile (same or new question).
+- **Energy:** Shown on screen (e.g. “Energy: 3”). Each correct answer adds 1. Used for “power” or just as a score.
+- **Goal:** Defeat all enemies. When all are defeated, show **“Level complete!”** and total energy, then a button like **“Back to Math Lab”** or **“Next level”**.
+
+### Tech (v1)
+
+- **State:** Character position `(x, y)`; list of enemy positions `[{x, y, questionIndex}, ...]`; set of defeated enemy indices; “question modal” state (open, which enemy, selected option, show result); optional “pending move” (when you try to step on an enemy we open the modal and only move if correct).
+- **Movement:** On Arrow key, compute next tile. If next tile is in bounds and empty or has a defeated enemy → move. If next tile has an undefeated enemy → open question modal and **don’t move** until they answer; if correct, then move and mark enemy defeated.
+- **Rendering:** Grid of cells (CSS Grid or flex). Each cell: background (ground), optional enemy sprite (if not defeated), optional character (if this cell is character position). Character and enemies can be emojis or small images.
+
+### Later (v2+)
+
+- Different character sprite and enemy sprites; simple animations.
+- More tiles (bigger map), obstacles (walls), keys/doors.
+- “Boss” enemy that asks a harder question or several questions.
+- Sound effects and celebration when defeating an enemy or completing the level.
+

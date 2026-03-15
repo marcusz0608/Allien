@@ -4,6 +4,7 @@ import heroImg from './assets/hero.png'
 import { TicTacToe } from './components/TicTacToe'
 import { MemoryMatch } from './components/MemoryMatch'
 import { Quiz } from './components/Quiz'
+import { MathLabGame } from './components/MathLabGame'
 import { getLevelQuestions } from './math/source'
 import type { MathQuestion, MathGradeId } from './math/types'
 import './App.css'
@@ -26,6 +27,7 @@ function App() {
   const [mathScore, setMathScore] = useState(0)
   const [mathFinished, setMathFinished] = useState(false)
   const [mathSelectedWorld, setMathSelectedWorld] = useState<string | null>(null)
+  const [mathGameMode, setMathGameMode] = useState(false)
 
   useEffect(() => {
     const savedGrade = window.localStorage.getItem('allien-math-grade') as MathGradeId | null
@@ -78,7 +80,23 @@ function App() {
     setMathShowAnswer(false)
     setMathScore(0)
     setMathFinished(false)
+    setMathGameMode(questions.length >= 3)
     setActiveGame('mathLevel')
+  }
+
+  function handleMathGameComplete(energy: number) {
+    setMathScore(energy)
+    if (mathMaxLevel < 2) {
+      setMathMaxLevel(2)
+      window.localStorage.setItem('allien-math-max-level', '2')
+    }
+    setMathGameMode(false)
+    setActiveGame(null)
+    setMathQuestions(null)
+    setMathIndex(0)
+    setMathSelectedOption(null)
+    setMathShowAnswer(false)
+    setMathFinished(false)
   }
 
   function handleMathCheckAnswer() {
@@ -108,6 +126,7 @@ function App() {
   function handleExitMathLevel() {
     setActiveGame(null)
     setMathQuestions(null)
+    setMathGameMode(false)
     setMathIndex(0)
     setMathSelectedOption(null)
     setMathShowAnswer(false)
@@ -229,7 +248,14 @@ function App() {
       )}
 
       <main className="main">
-        {activeGame === 'mathLevel' && mathGrade && mathSelectedLevel != null && mathQuestions && (
+        {activeGame === 'mathLevel' && mathGrade && mathSelectedLevel != null && mathQuestions && mathGameMode && mathQuestions.length >= 3 && (
+          <MathLabGame
+            questions={mathQuestions}
+            onComplete={handleMathGameComplete}
+            onBack={handleExitMathLevel}
+          />
+        )}
+        {activeGame === 'mathLevel' && mathGrade && mathSelectedLevel != null && mathQuestions && !mathGameMode && (
           <section className="math-level-screen">
             <button type="button" className="tictactoe-back" onClick={handleExitMathLevel}>← Back to Math Lab</button>
             <h2 className="math-level-title">➗ Math Lab</h2>
@@ -238,6 +264,25 @@ function App() {
               <>
                 {!mathFinished ? (
                   <>
+                    <div className="math-journey">
+                      <p className="math-energy-label">
+                        Energy: {mathScore} / {mathQuestions.length} — each correct answer moves you across!
+                      </p>
+                      <div className="math-track-wrap">
+                        <span className="math-track-start">Start</span>
+                        <div className="math-track">
+                          <div
+                            className="math-track-character"
+                            style={{ left: `${(mathScore / mathQuestions.length) * 100}%` }}
+                            role="img"
+                            aria-label="Your character"
+                          >
+                            <img src={heroImg} alt="" width="48" height="50" />
+                          </div>
+                        </div>
+                        <span className="math-track-end">Finish</span>
+                      </div>
+                    </div>
                     <p className="math-intro math-intro-detail">
                       Read the problem and choose the best answer.
                     </p>
