@@ -60,7 +60,7 @@ Quickly find what you want in the app:
 You can expand Allien by:
 - Adding new games to the Games Library
 - Adding new quiz topics
-- Enhancing the AI Assistant with more knowledge
+- Enhancing the AI Assistant with more knowledge (see [AI + ChatGPT setup](docs/AI_CHATGPT_SETUP.md) to use ChatGPT’s full knowledge)
 - Improving the search experience
 
 *This project was started by an 8-year-old coder! Dream big, code bigger!*

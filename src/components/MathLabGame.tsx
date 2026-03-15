@@ -1,14 +1,22 @@
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useMemo, useCallback } from 'react'
 import type { MathQuestion } from '../math/types'
 
 const MAP_COLS = 8
 const MAP_ROWS = 6
 
-const ENEMY_POSITIONS: { x: number; y: number; questionIndex: number }[] = [
-  { x: 2, y: 1, questionIndex: 0 },
-  { x: 4, y: 2, questionIndex: 1 },
-  { x: 6, y: 1, questionIndex: 2 },
-]
+type Foe = { x: number; y: number; questionIndex: number; isBoss: boolean }
+
+function buildFoePositions(questions: MathQuestion[], bossIndices: number[]): Foe[] {
+  const firstBossQ = bossIndices.length > 0 ? bossIndices[0] : Math.min(5, questions.length - 1)
+  return [
+    { x: 2, y: 1, questionIndex: 0, isBoss: false },
+    { x: 4, y: 1, questionIndex: 1, isBoss: false },
+    { x: 6, y: 1, questionIndex: 2, isBoss: false },
+    { x: 1, y: 3, questionIndex: 3, isBoss: false },
+    { x: 5, y: 3, questionIndex: 4, isBoss: false },
+    { x: 4, y: 4, questionIndex: firstBossQ, isBoss: true },
+  ]
+}
 
 type MathLabGameProps = {
   questions: MathQuestion[]
@@ -16,64 +24,72 @@ type MathLabGameProps = {
   onBack: () => void
 }
 
+const BOSS_QUESTION_COUNT = 3
+
 export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps) {
+  const bossIndices = useMemo(
+    () => questions.map((q, i) => (q.isBoss ? i : -1)).filter((i) => i >= 0).slice(0, BOSS_QUESTION_COUNT),
+    [questions],
+  )
+  const foePositions = useMemo(() => buildFoePositions(questions, bossIndices), [questions, bossIndices])
   const [char, setChar] = useState({ x: 0, y: 0 })
   const [defeated, setDefeated] = useState<number[]>([])
   const [energy, setEnergy] = useState(0)
   const [modal, setModal] = useState<{
-    enemyIndex: number
+    foeIndex: number
     questionIndex: number
+    isBoss: boolean
+    bossQuestionOffset: number // 0, 1, or 2 for boss's 3 questions
     selectedOption: number | null
     showAnswer: boolean
   } | null>(null)
 
-  const hasEnemy = useCallback(
+  const hasFoe = useCallback(
     (x: number, y: number) => {
-      const idx = ENEMY_POSITIONS.findIndex((e) => e.x === x && e.y === y)
+      const idx = foePositions.findIndex((f) => f.x === x && f.y === y)
       return idx >= 0 ? idx : -1
     },
-    [],
+    [foePositions],
   )
 
-  const isDefeated = useCallback(
-    (enemyIndex: number) => defeated.includes(enemyIndex),
-    [defeated],
-  )
+  const isDefeated = useCallback((foeIndex: number) => defeated.includes(foeIndex), [defeated])
 
   const handleKey = useCallback(
     (e: KeyboardEvent) => {
-      if (modal) return
-      let dx = 0
-      let dy = 0
-      if (e.key === 'ArrowUp') dy = -1
-      else if (e.key === 'ArrowDown') dy = 1
-      else if (e.key === 'ArrowLeft') dx = -1
-      else if (e.key === 'ArrowRight') dx = 1
-      else return
-      e.preventDefault()
+    if (modal) return
+    let dx = 0
+    let dy = 0
+    if (e.key === 'ArrowUp') dy = -1
+    else if (e.key === 'ArrowDown') dy = 1
+    else if (e.key === 'ArrowLeft') dx = -1
+    else if (e.key === 'ArrowRight') dx = 1
+    else return
+    e.preventDefault()
 
-      const nx = char.x + dx
-      const ny = char.y + dy
-      if (nx < 0 || nx >= MAP_COLS || ny < 0 || ny >= MAP_ROWS) return
+    const nx = char.x + dx
+    const ny = char.y + dy
+    if (nx < 0 || nx >= MAP_COLS || ny < 0 || ny >= MAP_ROWS) return
 
-      const enemyIdx = hasEnemy(nx, ny)
-      if (enemyIdx >= 0 && !isDefeated(enemyIdx)) {
-        const qIndex = ENEMY_POSITIONS[enemyIdx].questionIndex
-        if (qIndex < questions.length) {
-          setModal({
-            enemyIndex: enemyIdx,
-            questionIndex: qIndex,
-            selectedOption: null,
-            showAnswer: false,
-          })
-        } else {
-          setChar({ x: nx, y: ny })
-        }
+    const foeIdx = hasFoe(nx, ny)
+    if (foeIdx >= 0 && !isDefeated(foeIdx)) {
+      const foe = foePositions[foeIdx]
+      if (foe.isBoss ? bossIndices.length >= BOSS_QUESTION_COUNT : foe.questionIndex < questions.length) {
+        setModal({
+          foeIndex: foeIdx,
+          questionIndex: foe.questionIndex,
+          isBoss: foe.isBoss,
+          bossQuestionOffset: 0,
+          selectedOption: null,
+          showAnswer: false,
+        })
       } else {
         setChar({ x: nx, y: ny })
       }
-    },
-    [char, modal, defeated, hasEnemy, isDefeated, questions.length],
+    } else {
+      setChar({ x: nx, y: ny })
+    }
+  },
+    [char, modal, defeated, hasFoe, isDefeated, foePositions, questions.length, bossIndices.length],
   )
 
   useEffect(() => {
@@ -83,19 +99,35 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
 
   const handleCheckAnswer = () => {
     if (!modal || modal.selectedOption == null) return
-    const q = questions[modal.questionIndex]
+    const questionIndex = modal.isBoss ? bossIndices[modal.bossQuestionOffset] : modal.questionIndex
+    const q = questions[questionIndex]
     const correct = modal.selectedOption === q.answerIndex
     if (!modal.showAnswer) {
       if (correct) {
-        setEnergy((e) => e + 1)
-        setDefeated((d) => [...d, modal!.enemyIndex])
-        setChar((c) => {
-          const e = ENEMY_POSITIONS[modal!.enemyIndex]
-          return { x: e.x, y: e.y }
-        })
-        setModal(null)
+        if (modal.isBoss && modal.bossQuestionOffset < BOSS_QUESTION_COUNT - 1) {
+          setModal((m) =>
+            m
+              ? {
+                  ...m,
+                  bossQuestionOffset: m.bossQuestionOffset + 1,
+                  questionIndex: bossIndices[m.bossQuestionOffset + 1],
+                  selectedOption: null,
+                  showAnswer: false,
+                }
+              : null,
+          )
+        } else {
+          const bonus = modal.isBoss ? 2 : 1
+          setEnergy((e) => e + bonus)
+          setDefeated((d) => [...d, modal!.foeIndex])
+          setChar(() => {
+            const f = foePositions[modal!.foeIndex]
+            return { x: f.x, y: f.y }
+          })
+          setModal(null)
+        }
       } else {
-        setModal((m) => m ? { ...m, showAnswer: true } : null)
+        setModal((m) => (m ? { ...m, showAnswer: true } : null))
       }
     } else {
       setModal(null)
@@ -106,15 +138,7 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
     setModal(null)
   }
 
-  const allDefeated = ENEMY_POSITIONS.every((_, i) => defeated.includes(i))
-
-  useEffect(() => {
-    if (allDefeated) {
-      // Small delay so player sees the last enemy disappear
-      const t = setTimeout(() => {}, 400)
-      return () => clearTimeout(t)
-    }
-  }, [allDefeated])
+  const allDefeated = foePositions.every((_, i) => defeated.includes(i))
 
   if (allDefeated) {
     return (
@@ -124,7 +148,7 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
         </button>
         <h2 className="math-level-title">🎉 Level complete!</h2>
         <p className="math-intro math-intro-detail">
-          You defeated all enemies and earned <strong>{energy} energy</strong>. Great job!
+          You defeated all enemies and the boss! You earned <strong>{energy} energy</strong>. Great job!
         </p>
         <button type="button" className="math-start-level" onClick={() => onComplete(energy)}>
           Back to Math Lab
@@ -133,7 +157,10 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
     )
   }
 
-  const currentQuestion = modal != null ? questions[modal.questionIndex] : null
+  const currentQuestion =
+    modal != null
+      ? questions[modal.isBoss ? bossIndices[modal.bossQuestionOffset] : modal.questionIndex]
+      : null
 
   return (
     <section className="math-level-screen math-game-screen">
@@ -141,7 +168,7 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
         ← Back to Math Lab
       </button>
       <p className="math-energy-label math-game-energy">
-        Energy: {energy} — Use arrow keys to move. Step on an enemy to answer a question!
+        Energy: {energy} — Use arrow keys to move. Step on enemies (👾) or the boss (🐉). Boss asks 3 questions (2-digit) and gives +2 energy!
       </p>
 
       <div
@@ -154,12 +181,20 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
         {Array.from({ length: MAP_ROWS * MAP_COLS }, (_, i) => {
           const x = i % MAP_COLS
           const y = Math.floor(i / MAP_COLS)
-          const enemyIdx = hasEnemy(x, y)
+          const foeIdx = hasFoe(x, y)
           const isChar = char.x === x && char.y === y
-          const hasEnemyHere = enemyIdx >= 0 && !isDefeated(enemyIdx)
+          const hasFoeHere = foeIdx >= 0 && !isDefeated(foeIdx)
+          const foe = foeIdx >= 0 ? foePositions[foeIdx] : null
           return (
             <div key={i} className="math-game-cell">
-              {hasEnemyHere && !isChar && <span className="math-game-enemy" aria-hidden>👾</span>}
+              {hasFoeHere && !isChar && (
+                <span
+                  className={foe?.isBoss ? 'math-game-boss' : 'math-game-enemy'}
+                  aria-hidden
+                >
+                  {foe?.isBoss ? '🐉' : '👾'}
+                </span>
+              )}
               {isChar && <span className="math-game-character" aria-hidden>🧑</span>}
             </div>
           )
@@ -169,7 +204,11 @@ export function MathLabGame({ questions, onComplete, onBack }: MathLabGameProps)
       {modal != null && currentQuestion && (
         <div className="math-modal-backdrop" onClick={handleCloseModal}>
           <div className="math-modal math-game-modal" onClick={(e) => e.stopPropagation()}>
-            <h2 className="math-modal-title">👾 Enemy asks:</h2>
+            <h2 className="math-modal-title">
+              {modal.isBoss
+                ? `🐉 Boss question ${modal.bossQuestionOffset + 1} of ${BOSS_QUESTION_COUNT} (2-digit!):`
+                : '👾 Enemy asks:'}
+            </h2>
             <p className="quiz-question">{currentQuestion.prompt}</p>
             <div className="quiz-options">
               {currentQuestion.options.map((opt, idx) => {
