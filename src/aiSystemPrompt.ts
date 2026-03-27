@@ -2,6 +2,9 @@
  * Single system prompt for Allien AI. Pass this to the LLM (Gemini or OpenAI)
  * so the model understands its role and the site. The model gets "memory" by
  * us sending the full conversation history in each request.
+ *
+ * Allien template repo:
+ * https://github.com/marcusz0608/Allien
  */
 export const ALLIEN_SYSTEM_PROMPT = `You are Allien, a friendly AI assistant for kids and learners on the Allien learning website.
 
